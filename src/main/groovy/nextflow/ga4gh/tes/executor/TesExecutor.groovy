@@ -18,6 +18,7 @@ package nextflow.ga4gh.tes.executor
 
 import groovy.transform.CompileStatic
 import groovy.transform.PackageScope
+import groovy.transform.TypeCheckingMode
 import groovy.util.logging.Slf4j
 import nextflow.exception.AbortOperationException
 import nextflow.executor.Executor
@@ -105,14 +106,9 @@ class TesExecutor extends Executor implements ExtensionPoint {
             }
         }
     }
-
+    
     protected String getEndpoint() {
-        def result = session.getConfigAttribute('executor.tes.endpoint', null)
-        if( result )
-            log.warn 'Config option `executor.tes.endpoint` is deprecated, use `tes.endpoint` instead'
-        else
-            result = session.config.navigate('tes.endpoint', 'http://localhost:8000')
-
+        final String result = session.config.navigate('tes.endpoint', 'http://localhost:8000') as String
         log.debug "[TES] endpoint=$result"
         return result
     }
@@ -161,12 +157,11 @@ class TesExecutor extends Executor implements ExtensionPoint {
     /**
      * Create a a queue holder for this executor
      *
-     * @return
+     * @return the task monitor instance
      */
     TaskMonitor createTaskMonitor() {
-        return TaskPollingMonitor.create(session, name, 100, Duration.of('1 sec'))
+        return TaskPollingMonitor.create(session, config, name, 5, Duration.of('50ms'))
     }
-
 
     /*
      * Prepare and launch the task in the underlying execution platform
@@ -178,7 +173,5 @@ class TesExecutor extends Executor implements ExtensionPoint {
         log.debug "[TES] Launching process > ${task.name} -- work folder: ${task.workDir}"
         new TesTaskHandler(task, this)
     }
+
 }
-
-
-
