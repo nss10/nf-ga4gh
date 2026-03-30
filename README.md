@@ -81,6 +81,7 @@ tes {
 tes {
     timeout = 10 // Connect/read/write timeout duration (in seconds) to TES endpoint. Default 10s.
 }
+```
 
 ### TES Server
 
